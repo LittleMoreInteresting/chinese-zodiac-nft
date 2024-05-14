@@ -1,13 +1,8 @@
-# Sample Hardhat Project
+# Chinese Zodiac NFT [Dynamic]
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+## Introduce
 
-Try running some of the following tasks:
+## Directory
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
-```
+-  [`Zodiac`](contracts/Zodiac.sol)  NFT 合约
+- [`AutomaticallyUpdateMode`](contracts/AutomaticallyUpdateMode.sol) chainlink 自动执行合约

@@ -28,9 +28,6 @@ contract AutomaticallyUpdateWeather is AutomationCompatibleInterface
     Zodiac public nftModel;
 
     constructor(
-        string memory _jobId,
-        address _oracle,
-        address _linkAddress,
         address _zodAddress
     ) {
         interval = 1 hours;
