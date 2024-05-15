@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-
+import "hardhat/console.sol";
 error NOT__IN__WHITE__LIST();
 error NO__ENOUGH__ETH();
 error NO__ENOUGH__NFT();
@@ -18,7 +18,7 @@ error MAX__NUMBER__OF__NFT__OVER__1();
 error OVER__MAX__NUM__OF__BES();
 error IpfsNFT__TransferFailed();
 error ONCE_ERROR_DAY();
-contract Zodiac is
+contract ChineseZodiac is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,
@@ -186,13 +186,18 @@ contract Zodiac is
         uint256 modeValue = (_randomWords[0] % lengthOfMetaData);
         uint tokenId = resToToken[_requestId];
         tokenIdtoModeValue[tokenId] = modeValue;
-
+        console.log("_randomWords[0]",_randomWords[0],tokenId,modeValue);
         // According to the metadata configured above,use the index 0 of the pic array as default pic
         _setTokenURI(tokenId, allMetaData[modeValue][uint8(DayState.AM)]);
         emit MintSuccess(_requestId);
     }
 
-    function changeERTStatus() public {
+    function getTokenId() public view returns(uint256 tokenId) {
+        if (balanceOf(msg.sender) < 1) revert NO__ENOUGH__NFT();
+        tokenId = tokenOfOwnerByIndex(msg.sender, 0);
+    }
+
+    function changeNFTStatus() public {
        uint8 _hour = getCurrentHour(8);
         if (_hour != currentHour) {
             currentHour = _hour;

@@ -5,7 +5,7 @@ pragma solidity ^0.8.24;
 // ./interfaces/AutomationCompatibleInterface.sol
 
 import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
-import "./Zodiac.sol";
+import "./ChineseZodiac.sol";
 
 /**
  * THIS IS AN EXAMPLE CONTRACT THAT USES HARDCODED VALUES FOR CLARITY.
@@ -25,14 +25,14 @@ contract AutomaticallyUpdateWeather is AutomationCompatibleInterface
      */
     uint public immutable interval;
     uint public lastTimeStamp;
-    Zodiac public nftModel;
+    ChineseZodiac public nftModel;
 
     constructor(
         address _zodAddress
     ) {
         interval = 1 hours;
         lastTimeStamp = block.timestamp;
-        nftModel = Zodiac(_zodAddress) ;
+        nftModel = ChineseZodiac(_zodAddress);
     }
 
     function checkUpkeep(
@@ -41,19 +41,19 @@ contract AutomaticallyUpdateWeather is AutomationCompatibleInterface
         external
         view
         override
-        returns (bool upkeepNeeded, bytes memory /* performData */)
+        returns (bool upkeepNeeded, bytes memory performData )
     {
         upkeepNeeded = (block.timestamp - lastTimeStamp) > interval;
-
+        performData = "";
         // upkeepNeeded = true;
         // We don't use the checkData in this example. The checkData is defined when the Upkeep was registered.
     }
 
-    function performUpkeep(bytes calldata /* performData */) external override {
+    function performUpkeep(bytes calldata ) external override {
         //We highly recommend revalidating the upkeep in the performUpkeep function
         if ((block.timestamp - lastTimeStamp) > interval) {
             lastTimeStamp = block.timestamp;
-            nftModel.changeERTStatus();
+            nftModel.changeNFTStatus();
             counter++;
         }
     }

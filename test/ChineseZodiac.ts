@@ -2,6 +2,7 @@ import { assert, expect }  from "chai"
 import { BigNumberish, ContractEvent, ContractTransaction } from "ethers"
 import {
     loadFixture,
+    time,
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { network,ethers } from "hardhat";
 import * as dotenv from "dotenv";
@@ -42,7 +43,7 @@ describe("Zodiac Tests", function () {
             
        // 部署合约
        const _maxNumberOftoken = 10
-       const ZodiacContract = await ethers.getContractFactory("Zodiac")
+       const ZodiacContract = await ethers.getContractFactory("ChineseZodiac")
        const heroes = await ZodiacContract.connect(deployer).deploy(
             _maxNumberOftoken,
             subscriptionId,
@@ -76,7 +77,6 @@ describe("Zodiac Tests", function () {
 
     describe("fulfillRandomWords", function () {
         
-
         it("can only be called after mint", async () => {
             const { heroes,VRFCoordinatorV2Mock } = await loadFixture(deployZodiacFixture);
             await expect(
@@ -136,12 +136,71 @@ describe("Zodiac Tests", function () {
                 }
             })
 
+             // get tokenID 
+             const tokenID = await heroes.connect(minter).getTokenId()
              // get metadata
-             const tokenUri = await heroes.tokenURI(1)
-             console.log(tokenUri)
+             const tokenUri = await heroes.tokenURI(tokenID)
+             console.log(tokenID,tokenUri)
+             console.log(await heroes.getAddress())
+            
         })
     })
-    describe("",function (){
-        
+
+    describe("replaceMint", function (){
+        it("replaceMint",async function(){
+            const { heroes,deployer,mintFee,minter,preMintFee,VRFCoordinatorV2Mock } = await loadFixture(deployZodiacFixture);
+            const mintTx = await  heroes.connect(minter).mint({
+                value: mintFee,
+            })
+            const txReceipt = await mintTx.wait(1)
+
+            const requestId = txReceipt?.logs[2].topics[1] as string
+            console.log("requestId= ", requestId.toString())
+            await new Promise(async (resolve, reject) => {
+                try {
+                    await VRFCoordinatorV2Mock.fulfillRandomWords(
+                        requestId,
+                        heroes.getAddress(),
+                    )
+                    resolve("");
+                } catch (e) {
+                    reject(e)
+                }
+            })
+            // get tokenID 
+            const tokenID = await heroes.connect(minter).getTokenId()
+            // get metadata
+            const tokenUri = await heroes.tokenURI(tokenID)
+            console.log(tokenID,tokenUri)
+
+            // add one day
+            const tomorrow = new Date().setTime(new Date().getTime() + 86400);
+            await time.increaseTo(tomorrow)
+
+            const replaceMintTx = await  heroes.connect(minter).replaceMint({
+                value: preMintFee,
+            })
+            const replaceTxReceipt = await replaceMintTx.wait(1)
+            const requestId2 = replaceTxReceipt?.logs[1].topics[1] as string
+            console.log("requestId2= ", requestId2.toString())
+            await new Promise(async (resolve, reject) => {
+                try {
+                    await VRFCoordinatorV2Mock.fulfillRandomWords(
+                        requestId2,
+                        heroes.getAddress(),
+                    )
+                    resolve("");
+                } catch (e) {
+                    reject(e)
+                }
+            })
+             // get metadata
+             const tokenUri2 = await heroes.tokenURI(tokenID)
+             console.log(tokenID,tokenUri2)
+        })
+    })
+
+    describe("changeNFTStatus",function(){
+        // TODO 
     })
 })
