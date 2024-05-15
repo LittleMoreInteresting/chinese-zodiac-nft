@@ -202,5 +202,39 @@ describe("Zodiac Tests", function () {
 
     describe("changeNFTStatus",function(){
         // TODO 
+        it("changeNFTStatus",async function(){
+            const { heroes,deployer,mintFee,minter,preMintFee,VRFCoordinatorV2Mock } = await loadFixture(deployZodiacFixture);
+            const mintTx = await  heroes.connect(minter).mint({
+                value: mintFee,
+            })
+            const txReceipt = await mintTx.wait(1)
+
+            const requestId = txReceipt?.logs[2].topics[1] as string
+            console.log("requestId= ", requestId.toString())
+            await new Promise(async (resolve, reject) => {
+                try {
+                    await VRFCoordinatorV2Mock.fulfillRandomWords(
+                        requestId,
+                        heroes.getAddress(),
+                    )
+                    resolve("");
+                } catch (e) {
+                    reject(e)
+                }
+            })
+            // get tokenID 
+            const tokenID = await heroes.connect(minter).getTokenId()
+            // get metadata
+            const tokenUri = await heroes.tokenURI(tokenID)
+            console.log(tokenID,tokenUri)
+
+            // add hafe day
+            const tomorrow = new Date().setTime(new Date().getTime()+ 12*3600*1000);
+            await time.increaseTo(tomorrow)
+            await heroes.changeNFTStatus()
+            // get metadata
+            const tokenUriNew = await heroes.tokenURI(tokenID)
+            console.log(tokenID,tokenUriNew)
+        })
     })
 })

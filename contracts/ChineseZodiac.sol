@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-import "hardhat/console.sol";
 error NOT__IN__WHITE__LIST();
 error NO__ENOUGH__ETH();
 error NO__ENOUGH__NFT();
@@ -186,7 +185,6 @@ contract ChineseZodiac is
         uint256 modeValue = (_randomWords[0] % lengthOfMetaData);
         uint tokenId = resToToken[_requestId];
         tokenIdtoModeValue[tokenId] = modeValue;
-        console.log("_randomWords[0]",_randomWords[0],tokenId,modeValue);
         // According to the metadata configured above,use the index 0 of the pic array as default pic
         _setTokenURI(tokenId, allMetaData[modeValue][uint8(DayState.AM)]);
         emit MintSuccess(_requestId);
@@ -205,7 +203,7 @@ contract ChineseZodiac is
             if (newDayState != currentDayState) {
                 currentDayState = newDayState;
                 uint totalSupply = totalSupply();
-                for (uint i = 0; i < totalSupply; i++) {
+                for (uint i = 1; i <= totalSupply; i++) {
                     uint modeValue = tokenIdtoModeValue[i];
                     _setTokenURI(
                         i,
