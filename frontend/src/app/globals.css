@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.nft-bg-image {
+    background-image: url("/chinese-2417918_640.jpg");
+}
+.nft-bg-half {
+    background: rgba(255, 255, 255, 0.8);
+}
