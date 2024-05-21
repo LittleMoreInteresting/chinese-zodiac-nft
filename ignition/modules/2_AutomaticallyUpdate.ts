@@ -1,10 +1,8 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { network,ethers } from "hardhat";
-import { automaticallyUpdateModeSol } from "../../typechain-types/contracts";
 
-const _zodAddress = "";
-const AutomaticallyUpdateModule = buildModule("AutomaticallyUpdateModel",(m) => {
-    const automaticallyUpdate = m.contract("AutomaticallyUpdateModel", [
+const _zodAddress = "0xb9bF68d089A013b3BD96Cca947C870C1e7164597";
+const AutomaticallyUpdateModule = buildModule("AutomaticallyUpdateMode",(m) => {
+    const automaticallyUpdate = m.contract("AutomaticallyUpdateMode", [
         _zodAddress,
     ]);
     return { automaticallyUpdate: automaticallyUpdate };

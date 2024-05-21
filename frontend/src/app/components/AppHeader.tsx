@@ -5,8 +5,8 @@ import Link  from "next/link"
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 export default function AppHeader() {
     return (
-      <div className="container bg-gradient-to-r from-cyan-500 to-blue-500 m-5 rounded-lg">
-    <Navbar >
+      <div className="container ">
+    <Navbar className="bg-gradient-to-r from-cyan-500 to-blue-500 m-5 rounded-full rounded-full">
       <NavbarBrand>
       <Link href="/" ><p className="font-bold text-inherit">Chinese Zodiac</p></Link>
       </NavbarBrand>

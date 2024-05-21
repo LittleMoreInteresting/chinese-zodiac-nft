@@ -8,8 +8,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
-import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+
+import {VRFConsumerBaseV2Plus} from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
+import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
+
 error NOT__IN__WHITE__LIST();
 error NO__ENOUGH__ETH();
 error NO__ENOUGH__NFT();
@@ -21,8 +23,8 @@ contract ChineseZodiac is
     ERC721,
     ERC721Enumerable,
     ERC721URIStorage,
-    Ownable,
-    VRFConsumerBaseV2
+    
+    VRFConsumerBaseV2Plus
 {
    uint256 _tokenIdCounter = 1;
 
@@ -35,7 +37,7 @@ contract ChineseZodiac is
     VRFCoordinatorV2Interface COORDINATOR;
 
     // Your subscription ID.
-    uint64 immutable s_subscriptionId;
+    uint256 immutable s_subscriptionId;
 
     bytes32 immutable keyHash; // subscription
     uint32 public immutable callbackGasLimit; 
@@ -70,13 +72,12 @@ contract ChineseZodiac is
     
     constructor(
         uint _maxNumberOftoken,
-        uint64 _subscriptionId,
+        uint256 _subscriptionId,
         address _VRFADDRESS,
         bytes32 _keyHash
     )
         ERC721("Zodiac", "ZOD")
-        Ownable(_msgSender())
-        VRFConsumerBaseV2(_VRFADDRESS)
+        VRFConsumerBaseV2Plus(_VRFADDRESS)
     {
         COORDINATOR = VRFCoordinatorV2Interface(_VRFADDRESS);
         keyHash = _keyHash;
@@ -162,14 +163,25 @@ contract ChineseZodiac is
 
     // Assumes the subscription is funded sufficiently.
     function request(uint256 tokenId,bool isReplace) internal returns (uint256 requestId) {
-        // Will revert if subscription is not set and funded.
-        requestId = COORDINATOR.requestRandomWords(
-            keyHash,
-            s_subscriptionId,
-            requestConfirmations,
-            callbackGasLimit,
-            numWords
-        );
+        // Will revert if subscription is not set and funded. v2
+        // requestId = COORDINATOR.requestRandomWords(
+        //     keyHash,
+        //     s_subscriptionId,
+        //     requestConfirmations,
+        //     callbackGasLimit,
+        //     numWords
+        // ); 
+        // v2.5
+         requestId = s_vrfCoordinator.requestRandomWords(VRFV2PlusClient.RandomWordsRequest({
+            keyHash: keyHash,
+            subId: s_subscriptionId,
+            requestConfirmations: requestConfirmations,
+            callbackGasLimit: callbackGasLimit,
+            numWords: numWords,
+            extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true})) // new parameter
+        })
+);
+
         if (!isReplace){
             _safeMint(msg.sender, tokenId);
         }       

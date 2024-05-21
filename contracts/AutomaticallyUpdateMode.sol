@@ -13,7 +13,7 @@ import "./ChineseZodiac.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract AutomaticallyUpdateWeather is AutomationCompatibleInterface
+contract AutomaticallyUpdateMode is AutomationCompatibleInterface
 {
     /**
      * Public counter variable

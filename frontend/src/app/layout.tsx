@@ -9,7 +9,7 @@ import {
 } from 'wagmi'
 import { wagmiConfig } from "@/app/wagmiConfig"
 const inter = Inter({ subsets: ["latin"] });
-
+import { Toaster } from 'sonner';
 export const metadata: Metadata = {
   title: "Chinese Zodiac NFT",
   description: "Chinese Zodiac NFT app",
@@ -29,6 +29,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers  initialState={initialState}>
           {children}
+          <Toaster />
         </Providers>
       </body>
     </html>

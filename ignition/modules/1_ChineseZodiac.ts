@@ -1,5 +1,5 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
-import { network,ethers } from "hardhat";
+import { network } from "hardhat";
 import * as dotenv from "dotenv";
 dotenv.config();
 import {networkConfig} from "../../helper-hardhat-config";
@@ -7,7 +7,7 @@ const chainId = network.config.chainId??31337
 const config = networkConfig[chainId]
 const _maxNumberOftoken = 10000
 const _keyHash = config["gasLane"] ||
-            "0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc"
+            "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
 const vrfCoordinatorV2Address = config["vrfCoordinatorV2"]
 const subscriptionId = config["subscriptionId"]
 const ChineseZodiacModule = buildModule("ChineseZodiacModule", (m) => {
