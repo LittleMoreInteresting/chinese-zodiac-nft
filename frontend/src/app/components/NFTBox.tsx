@@ -1,7 +1,7 @@
 'use client'
 import {Image} from "@nextui-org/image";
 import {Button, Card,CardFooter,CardBody} from "@nextui-org/react";
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useRef, cache} from "react";
 import {
   useAccount,
   useChainId,
@@ -14,6 +14,9 @@ import { parseEther } from "viem/utils";
 
 import {wagmiContractConfig } from "@/app/utils/wagmiContractConfig"
 import { wagmiConfig } from "@/app/wagmiConfig"
+
+import Moralis from "moralis";
+import { EvmChainParser } from "@moralisweb3/common-evm-utils";
 
 export default function NFTBox() {
     const list = [
@@ -81,20 +84,57 @@ export default function NFTBox() {
     const { address,isConnected } = useAccount();
     const chainId = useChainId();
     const [minted,setMinted] = useState(false)
+    const [name,setName] = useState("NFT")
+    const [image,setImage] = useState("/chinese-2417918_640.jpg")
+    const [desc,setDesc] = useState("Get Your Chinese Zodiac NFT")
+
     const getAccountBalance = async ()=>{
      const balance = await  readContract(wagmiConfig,{
         ...wagmiContractConfig,
         functionName: 'balanceOf',
         args: [address as `0x${string}`],
+        account:address,
       })
       if(balance && balance > 0) {
-        setMinted(true)
+        setMinted(true);
+        const tokenId = await  readContract(wagmiConfig,{
+          ...wagmiContractConfig,
+          functionName: 'getTokenId',
+          account:address,
+        })
+        const tokenURI = await  readContract(wagmiConfig,{
+          ...wagmiContractConfig,
+          functionName: 'tokenURI',
+          args:[tokenId],
+          account:address,
+        })
+        console.log("tokenURI",tokenURI)
+       const {name:_name,image:_image,description:_description} = await nftMetadata(tokenId.toString());
+       setName(_name);
+       setImage(_image);
+       setDesc(_description)
       }
-      const totalSupply = await  readContract(wagmiConfig,{
-        ...wagmiContractConfig,
-        functionName: 'totalSupply',
-      })
-      console.log(totalSupply)
+    }
+    async function nftMetadata(tokenId:string) {
+      const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY
+      await Moralis.start({
+        apiKey: API_KEY,
+      });
+    
+      const address = wagmiContractConfig.address;
+    
+      const chain = EvmChainParser.parse(chainId);
+    
+      const response = await Moralis.EvmApi.nft.getNFTMetadata({
+        address,
+        chain,
+        tokenId,
+      });
+      const result = response?.toJSON();
+      if (result?.metadata){
+        return JSON.parse(result.metadata);
+      }
+      return {}
     }
     
 
@@ -140,6 +180,7 @@ export default function NFTBox() {
   const {
     data: hashReplace,
     error:errorReplace,
+    isPending:isPendingReplace,
     writeContract:writeContractReplace
 } = useWriteContract({
     mutation:{
@@ -173,28 +214,11 @@ async function ReplaceNft() {
     })
 }
 
-  // show NFT 
-  const getNftMatedata = async ()=>{
-    if (!minted){
-      return;
-    }
-    const tokenId = await  readContract(wagmiConfig,{
-      ...wagmiContractConfig,
-      functionName: 'getTokenId',
-    })
-    console.log(tokenId)
-    const tokenURI = await  readContract(wagmiConfig,{
-      ...wagmiContractConfig,
-      functionName: 'tokenURI',
-      args:[tokenId]
-    })
-    console.log("tokenURI",tokenURI)
-  }
+ 
 
   useEffect(()=>{
     if(isConnected){
       getAccountBalance()
-      getNftMatedata();
     }
   },[address, chainId])
     return(
@@ -207,21 +231,21 @@ async function ReplaceNft() {
                         width={520}
                         isZoomed
                         alt="NextUI hero Image"
-                        src="/chinese-2417918_640.jpg"
+                        src={image}
                     />
                     <CardFooter className="absolute bg-black/60 bottom-0 z-10 border-t-1 border-default-600 dark:border-default-100">
-                    <h2 className="text-white mr-2">CZ</h2>
-                    <p className="text-white text-tiny">Get Your Chinese Zodiac NFT</p>
+                    <h2 className="text-white mr-2">{name}</h2>
+                    <p className="text-white text-tiny">{desc}</p>
                     </CardFooter>
                 </Card>
                 <div className="flex m-5 justify-center">
                 <div className="mr-5">
-                <Button onClick={mintNft} isPending={isPending} isDisabled={minted} radius="full" className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg">
+                <Button onClick={mintNft} isLoading={isPending} isDisabled={minted} radius="full" className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg">
                     Mint NFT <span>0.0005 ETH</span>
                 </Button>
                 </div>
                 <div>
-                    <Button onClick={ReplaceNft} isDisabled={!minted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
+                    <Button onClick={ReplaceNft} isLoading={isPendingReplace} isDisabled={!minted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
                         Replace <span>0.0001 ETH</span>
                     </Button>
                 </div>

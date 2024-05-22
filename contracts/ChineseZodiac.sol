@@ -184,7 +184,7 @@ contract ChineseZodiac is
 
         if (!isReplace){
             _safeMint(msg.sender, tokenId);
-        }       
+        }
         resToToken[requestId] = tokenId;
         emit MintRequest(requestId);
     }
