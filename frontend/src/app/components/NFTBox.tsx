@@ -203,6 +203,10 @@ async function ReplaceNft() {
     if(isConnected){
       getAccountBalance()
     }
+    setMinted(false);
+    setName("CZ");
+    setImage("/chinese-2417918_640.jpg");
+    setDesc("Get Your Chinese Zodiac NFT")
   },[address, chainId])
     return(
     <div className="container">
