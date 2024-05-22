@@ -18,17 +18,18 @@ describe("Automatically Tests", function () {
        const preMintFee = ethers.parseEther("0.0001")
        const mintFee = ethers.parseEther("0.0005")
        // 部署Mock
-       const BASE_FEE = "100000000000000000"
-        const GAS_PRICE_LINK = "1000000000" // 0.000000001 LINK per gas
+       const BASE_FEE = "1"
+        const GAS_PRICE_LINK = "0" // 0.000000001 LINK per gas
 
         const chainId = 31337
 
         const VRFCoordinatorV2MockFactory = await ethers.getContractFactory(
-            "VRFCoordinatorV2Mock"
+            "VRFCoordinatorV2_5Mock"
         )
         const VRFCoordinatorV2Mock = await VRFCoordinatorV2MockFactory.deploy(
             BASE_FEE,
-            GAS_PRICE_LINK
+            GAS_PRICE_LINK,
+            1
         )
 
         const fundAmount = "1000000000000000000"

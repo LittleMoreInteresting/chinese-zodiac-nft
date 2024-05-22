@@ -18,26 +18,27 @@ describe("Zodiac Tests", function () {
        const preMintFee = ethers.parseEther("0.0001")
        const mintFee = ethers.parseEther("0.0005")
        // 部署Mock
-       const BASE_FEE = "100000000000000000"
-        const GAS_PRICE_LINK = "1000000000" // 0.000000001 LINK per gas
+       const BASE_FEE = "1"
+        const GAS_PRICE_LINK = "0" // 0.000000001 LINK per gas
 
         const chainId = 31337
 
         const VRFCoordinatorV2MockFactory = await ethers.getContractFactory(
-            "VRFCoordinatorV2Mock"
+            "VRFCoordinatorV2_5Mock"
         )
         const VRFCoordinatorV2Mock = await VRFCoordinatorV2MockFactory.deploy(
             BASE_FEE,
-            GAS_PRICE_LINK
+            GAS_PRICE_LINK,
+            1
         )
 
-        const fundAmount = "1000000000000000000"
+        const fundAmount = "100000000000000000000"
         const transaction = await VRFCoordinatorV2Mock.createSubscription()
         const transactionReceipt = await transaction.wait(1)
         
         const subscriptionId = transactionReceipt?.logs[0].topics[1] as string
-        await VRFCoordinatorV2Mock.fundSubscription(subscriptionId, fundAmount)
 
+        await VRFCoordinatorV2Mock.fundSubscription(subscriptionId, fundAmount)
         const _VRFADDRESS = VRFCoordinatorV2Mock.getAddress()
         const _keyHash = "0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c"
             
@@ -84,7 +85,7 @@ describe("Zodiac Tests", function () {
                     0,
                     heroes.getAddress(),
                 ), // reverts if not fulfilled
-            ).to.be.revertedWith("nonexistent request")
+            ).to.be.reverted
         })
 
         //prmint an erc721

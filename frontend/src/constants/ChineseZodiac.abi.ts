@@ -165,7 +165,13 @@ export const nftAbi = [
     "type": "error"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "msg",
+        "type": "string"
+      }
+    ],
     "name": "ONCE_ERROR_DAY",
     "type": "error"
   },

@@ -18,7 +18,7 @@ error NO__ENOUGH__NFT();
 error MAX__NUMBER__OF__NFT__OVER__1();
 error OVER__MAX__NUM__OF__BES();
 error IpfsNFT__TransferFailed();
-error ONCE_ERROR_DAY();
+error ONCE_ERROR_DAY(string msg);
 contract ChineseZodiac is
     ERC721,
     ERC721Enumerable,
@@ -129,7 +129,7 @@ contract ChineseZodiac is
         Dog.push("https://ipfs.filebase.io/ipfs/QmaCGjL6vSBR7FuEbxgpFaUkoNH1w71U7L4AtAtxJUgEM3");
 
         string[] storage Pig = allMetaData[11];
-        Pig.push("https://ipfs.filebase.io/ipfs/QmYnLpxuhTKtW3YgqiJi9eGynQaFeJ6PApwtSHaUG4FMVo");
+        Pig.push("https://ipfs.filebase.io/ipfs/QmTcQUcsjnCUjNDzPM5unCwfEX62TRH3tZV1m9XxnaJS3F");
         Pig.push("https://ipfs.filebase.io/ipfs/QmTZ2Edqa4PniZxLyMmArg5jdj5BWhacabmZPjKGsbN3Ma");
 
         lengthOfMetaData = 12;
@@ -154,7 +154,7 @@ contract ChineseZodiac is
         );
         if (balanceOf(msg.sender) < 1) revert NO__ENOUGH__NFT();
         if((block.timestamp - latestMintTime[msg.sender]) <  1 days ){
-            revert ONCE_ERROR_DAY();
+            revert ONCE_ERROR_DAY("once a day");
         }
         uint256 tokenId = tokenOfOwnerByIndex(msg.sender,0);
         request(tokenId,true);
@@ -178,7 +178,7 @@ contract ChineseZodiac is
             requestConfirmations: requestConfirmations,
             callbackGasLimit: callbackGasLimit,
             numWords: numWords,
-            extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: true})) // new parameter
+            extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false})) // new parameter
         })
 );
 
