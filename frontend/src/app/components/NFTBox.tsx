@@ -15,9 +15,6 @@ import { parseEther } from "viem/utils";
 import {wagmiContractConfig } from "@/app/utils/wagmiContractConfig"
 import { wagmiConfig } from "@/app/wagmiConfig"
 
-import Moralis from "moralis";
-import { EvmChainParser } from "@moralisweb3/common-evm-utils";
-
 export default function NFTBox() {
     const list = [
         {
@@ -109,30 +106,16 @@ export default function NFTBox() {
           account:address,
         })
         console.log("tokenURI",tokenURI)
-       const {name:_name,image:_image,description:_description} = await nftMetadata(tokenId.toString());
-       setName(_name);
-       setImage(_image);
-       setDesc(_description)
+        const {name:_name,image:_image,description:_description} = await nftMetadata(tokenURI);
+        setName(_name);
+        setImage(_image);
+        setDesc(_description)
       }
     }
-    async function nftMetadata(tokenId:string) {
-      const API_KEY = process.env.NEXT_PUBLIC_MORALIS_API_KEY
-      await Moralis.start({
-        apiKey: API_KEY,
-      });
-    
-      const address = wagmiContractConfig.address;
-    
-      const chain = EvmChainParser.parse(chainId);
-    
-      const response = await Moralis.EvmApi.nft.getNFTMetadata({
-        address,
-        chain,
-        tokenId,
-      });
-      const result = response?.toJSON();
-      if (result?.metadata){
-        return JSON.parse(result.metadata);
+    async function nftMetadata(tokenURI:string) {
+      const tokenURIResponse = await (await fetch(tokenURI)).json();
+      if (tokenURIResponse){
+        return tokenURIResponse;
       }
       return {}
     }
@@ -227,8 +210,8 @@ async function ReplaceNft() {
             <div className="justify-center">
                 <Card className="col-span-12 sm:col-span-4 h-[500px]">
                     <Image 
-                        className="object-none object-center"
-                        width={520}
+                        className="m-2"
+                        width={450}
                         isZoomed
                         alt="NextUI hero Image"
                         src={image}
