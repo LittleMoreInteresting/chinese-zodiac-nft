@@ -8,6 +8,7 @@ import {
   type BaseError,
   useWriteContract
 } from "wagmi";
+import { type WriteContractsErrorType } from '@wagmi/core/experimental'
 import { readContract,waitForTransactionReceipt } from '@wagmi/core'
 import { toast } from 'sonner'
 import { parseEther } from "viem/utils";
@@ -182,7 +183,8 @@ export default function NFTBox() {
     }
 })
 if (errorReplace) {
-    toast.error("Error: "+((errorReplace as BaseError).shortMessage || errorReplace.message))
+    console.log(((errorReplace as BaseError).shortMessage || errorReplace.message))
+    toast.error("Error:Replace once every 24h ")
 }
 async function ReplaceNft() {
     if (!isConnected){
