@@ -21,63 +21,63 @@ export default function NFTBox() {
         {
           title: "Rat",
           img: "/images/1.png",
-          
+          desc: "Intelligent, adaptable, and resourceful."
         },
         {
           title: "Ox",
           img: "/images/2.png",
-          
+          desc: "Diligent, reliable, and patient."
         },
         {
           title: "Tiger",
           img: "/images/3.png",
-          
+          desc:"Brave, confident, and powerful."
         },
         {
           title: "Rabbit",
           img: "/images/4.png",
-          
+          desc:"Gentle, kind, and peaceful."
         },
         {
           title: "Chinese loong",
           img: "/images/5.png",
-          
+          desc:"Strong, wise, and majestic."
         },
         {
           title: "Snake",
           img: "/images/6.png",
-          
+          desc:"Cunning, enigmatic, and insightful."
         },
         {
           title: "Horse",
           img: "/images/7.png",
-          
+          desc:"Free-spirited, courageous, and energetic."
         },
         {
           title: "Goat",
           img: "/images/8.png",
-          
+          desc:"Mild-mannered, kind-hearted, and compassionate."
         },
         {
-            title: "Monkey",
-            img: "/images/9.png",
-            
-          },
-          {
-            title: "Rooster",
-            img: "/images/10.png",
-            
-          },
-          {
-            title: "Dog",
-            img: "/images/11.png",
-            
-          },
-          {
-            title: "Pig",
-            img: "/images/12.png",
-            
-          },
+          title: "Monkey",
+          img: "/images/9.png",
+          desc:"Clever, flexible, and playful."
+        },
+        {
+          title: "Rooster",
+          img: "/images/10.png",
+          desc:"Hardworking, brave, and competitive."
+        },
+        {
+          title: "Dog",
+          img: "/images/11.png",
+          desc:"Loyal, friendly, and affectionate."
+        },
+        {
+          title: "Pig",
+          img: "/images/12.png",
+          desc:"Honest, tolerant, and fortunate."
+        },
       ];
     const { address,isConnected } = useAccount();
     const chainId = useChainId();
@@ -245,11 +245,13 @@ async function ReplaceNft() {
                 {list.map((item, index) => (
                     <Card  key={index} isPressable onPress={() => console.log("item pressed")}>
                     <CardBody className="overflow-visible p-0">
+
                         <Image
                         alt={item.title}
                         className="w-full object-cover h-[140px]"
                         src={item.img}
                         />
+                        <p className="m-2 max-w-[220px]">{item.desc.split(",").map((w,i) => ( <><span>{w}</span><br /></> ))}</p>
                     </CardBody>
                     <CardFooter className="text-small justify-between">
                         <b>{item.title}</b>

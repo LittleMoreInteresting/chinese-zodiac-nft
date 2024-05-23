@@ -29,7 +29,16 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers  initialState={initialState}>
           {children}
-          <Toaster />
+          <Toaster position="bottom-right"  expand={true}
+                     toastOptions={{
+                         classNames: {
+                             error: 'bg-red-400',
+                             success: 'bg-green-400',
+                             warning: 'bg-yellow-400',
+                             info: 'bg-blue-400',
+                         },
+                     }}
+          />
         </Providers>
       </body>
     </html>
