@@ -1,6 +1,6 @@
 'use client'
 import {Image} from "@nextui-org/image";
-import {Button, Card,CardFooter,CardBody} from "@nextui-org/react";
+import {Button, Card,CardFooter,CardBody,Divider} from "@nextui-org/react";
 import React, {useState, useEffect, useRef, cache} from "react";
 import {
   useAccount,
@@ -8,13 +8,14 @@ import {
   type BaseError,
   useWriteContract
 } from "wagmi";
-import { type WriteContractsErrorType } from '@wagmi/core/experimental'
+
 import { readContract,waitForTransactionReceipt } from '@wagmi/core'
 import { toast } from 'sonner'
 import { parseEther } from "viem/utils";
 
 import {wagmiContractConfig } from "@/app/utils/wagmiContractConfig"
 import { wagmiConfig } from "@/app/wagmiConfig"
+import AboutCard from "./AboutCard"
 
 export default function NFTBox() {
     const list = [
@@ -228,17 +229,19 @@ async function ReplaceNft() {
                     </CardFooter>
                 </Card>
                 <div className="flex m-5 justify-center">
-                <div className="mr-5">
-                <Button onClick={mintNft} isLoading={isPending} isDisabled={minted} radius="full" className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg">
-                    Mint NFT <span>0.0005 ETH</span>
-                </Button>
+                  <div className="mr-5">
+                  <Button onClick={mintNft} isLoading={isPending} isDisabled={minted} radius="full" className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg">
+                      Mint NFT <span>0.0005 ETH</span>
+                  </Button>
+                  </div>
+                  <div>
+                      <Button onClick={ReplaceNft} isLoading={isPendingReplace} isDisabled={!minted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
+                          Replace <span>0.0001 ETH</span>
+                      </Button>
+                  </div>                
                 </div>
-                <div>
-                    <Button onClick={ReplaceNft} isLoading={isPendingReplace} isDisabled={!minted} radius="full" className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg">
-                        Replace <span>0.0001 ETH</span>
-                    </Button>
-                </div>
-                </div>
+                <Divider />
+                <AboutCard />
             </div>
             <div className="grow flex flex-col">
                 <div className="gap-2 grid grid-cols-3 sm:grid-cols-4">
