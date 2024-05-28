@@ -8,8 +8,13 @@ import {
   type BaseError,
   useWriteContract
 } from "wagmi";
-
-import { readContract,waitForTransactionReceipt } from '@wagmi/core'
+import {  } from '@wagmi/core'
+import { 
+  readContract,
+  waitForTransactionReceipt,
+  watchContractEvent,
+  watchChainId
+} from '@wagmi/core'
 import { toast } from 'sonner'
 import { parseEther } from "viem/utils";
 
@@ -86,7 +91,12 @@ export default function NFTBox() {
     const [name,setName] = useState("NFT")
     const [image,setImage] = useState("/chinese-2417918_640.jpg")
     const [desc,setDesc] = useState("Get Your Chinese Zodiac NFT")
-
+    const [TOKEN_ID,setTOKEN_ID] = useState(BigInt(0))
+    const unwatch = watchChainId(wagmiConfig, {
+      onChange(chainId) {
+        getAccountBalance();
+      },
+    })
     const getAccountBalance = async ()=>{
      const balance = await  readContract(wagmiConfig,{
         ...wagmiContractConfig,
@@ -101,18 +111,22 @@ export default function NFTBox() {
           functionName: 'getTokenId',
           account:address,
         })
-        const tokenURI = await  readContract(wagmiConfig,{
-          ...wagmiContractConfig,
-          functionName: 'tokenURI',
-          args:[tokenId],
-          account:address,
-        })
-        console.log("tokenURI",tokenURI)
-        const {name:_name,image:_image,description:_description} = await nftMetadata(tokenURI);
-        setName(_name);
-        setImage(_image);
-        setDesc(_description)
+        setTOKEN_ID(tokenId)
+        await flushNFTUI(tokenId)
       }
+    }
+    const flushNFTUI = async(tokenId:bigint) => {
+      const tokenURI = await  readContract(wagmiConfig,{
+        ...wagmiContractConfig,
+        functionName: 'tokenURI',
+        args:[tokenId],
+        account:address,
+      })
+      console.log("tokenURI",tokenURI)
+      const {name:_name,image:_image,description:_description} = await nftMetadata(tokenURI);
+      setName(_name);
+      setImage(_image);
+      setDesc(_description)
     }
     async function nftMetadata(tokenURI:string) {
       const tokenURIResponse = await (await fetch(tokenURI)).json();
@@ -124,7 +138,7 @@ export default function NFTBox() {
     
 
     // Mint NFT 
-    const {
+  const {
       data: hash,
       error,
       isPending,
@@ -141,6 +155,7 @@ export default function NFTBox() {
               if (listReceipt.status == "success"){
                   toast.success("mint success !!!")
                   setMinted(true)
+                  await watchMintSuccess();
               }
           }
       }
@@ -179,6 +194,7 @@ export default function NFTBox() {
             if (listReceipt.status == "success"){
                 toast.success("Replace success !!!")
                 setMinted(true)
+                await watchMintSuccess();
             }
         }
     }
@@ -200,7 +216,33 @@ async function ReplaceNft() {
     })
 }
 
- 
+async function watchMintSuccess() {
+  const unwatch = watchContractEvent(wagmiConfig, {
+    ...wagmiContractConfig,
+    eventName: 'MintSuccess',
+    onLogs(logs) {
+
+      console.log(logs)
+      logs.forEach(async (log) => {
+        console.log(log);
+        const requestId = log.args.requestId;
+        const tokenId = await readContract(wagmiConfig,{
+          ...wagmiContractConfig,
+          functionName: 'resToToken',
+          args:[requestId as bigint],
+          account:address,
+        })
+        if (TOKEN_ID == BigInt(0) ){
+         await getAccountBalance();
+        }
+        if(tokenId == TOKEN_ID) {
+          unwatch();
+          await flushNFTUI(tokenId);
+        }
+      })
+    },
+  })
+}
 
   useEffect(()=>{
     if(isConnected){
