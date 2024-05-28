@@ -113,7 +113,9 @@ export default function NFTBox() {
         })
         setTOKEN_ID(tokenId)
         await flushNFTUI(tokenId)
+        return tokenId;
       }
+      return BigInt(0);
     }
     const flushNFTUI = async(tokenId:bigint) => {
       const tokenURI = await  readContract(wagmiConfig,{
@@ -232,10 +234,13 @@ async function watchMintSuccess() {
           args:[requestId as bigint],
           account:address,
         })
-        if (TOKEN_ID == BigInt(0) ){
-         await getAccountBalance();
+        let userTokenId = TOKEN_ID;
+        if (userTokenId == BigInt(0) ){
+          userTokenId = await getAccountBalance();
         }
-        if(tokenId == TOKEN_ID) {
+        console.log("userTokenId",userTokenId)
+        console.log("tokenId",tokenId)
+        if(tokenId == userTokenId) {
           unwatch();
           await flushNFTUI(tokenId);
         }
