@@ -1,11 +1,12 @@
 import { assert, expect }  from "chai"
-import { BigNumberish, ContractEvent, ContractTransaction } from "ethers"
+import { BigNumberish, ContractEvent, ContractMethodArgs, ContractTransaction } from "ethers"
 import {
     loadFixture,
     time,
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { network,ethers } from "hardhat";
 import * as dotenv from "dotenv";
+import { CustomPromisify } from "util";
 dotenv.config();
 
 describe("Zodiac Tests", function () {
@@ -14,9 +15,7 @@ describe("Zodiac Tests", function () {
         const accounts = await ethers.getSigners()
         const deployer = accounts[0]
         const minter = accounts[1]
-        // Gas常量
-       const preMintFee = ethers.parseEther("0.0001")
-       const mintFee = ethers.parseEther("0.0005")
+       
        // 部署Mock
        const BASE_FEE = "1"
         const GAS_PRICE_LINK = "0" // 0.000000001 LINK per gas
@@ -53,12 +52,16 @@ describe("Zodiac Tests", function () {
         )
         // 添加 consumer
         VRFCoordinatorV2Mock.addConsumer(subscriptionId,heroes.getAddress())
-        
+         // Gas常量
+       const mintFee = await heroes.mintPrice();
+       const preMintFee = await  heroes.replaceMintPrice();
+       const customMintPrice = await heroes.mintCustomPrice();
         return {
             deployer,
             minter,
             preMintFee,
             mintFee,
+            customMintPrice,
             ZodiacContract,
             heroes,
             _maxNumberOftoken,
@@ -236,6 +239,27 @@ describe("Zodiac Tests", function () {
             // get metadata
             const tokenUriNew = await heroes.tokenURI(tokenID)
             console.log(tokenID,tokenUriNew)
+        })
+    })
+
+    describe("customMint",function(){
+        it("replaceMint",async function(){
+            const { heroes,deployer,customMintPrice,minter,preMintFee,VRFCoordinatorV2Mock } = await loadFixture(deployZodiacFixture);
+            const mintTx = await  heroes.connect(minter).mintCustom(1,{
+                value: customMintPrice,
+            })
+            const txReceipt = await mintTx.wait(1)
+            const requestId = txReceipt?.logs[2].topics[1] as string
+            console.log("requestId= ", requestId.toString())
+            
+            // get tokenID 
+            const tokenID = await heroes.connect(minter).getTokenId()
+            // get metadata
+            const tokenUri = await heroes.tokenURI(tokenID)
+            console.log(tokenID,tokenUri)
+            // get mint type 
+            const mType = await heroes.userMintType(minter)
+            console.log(mType);
         })
     })
 })

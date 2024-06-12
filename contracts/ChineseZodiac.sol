@@ -18,7 +18,8 @@ error NO__ENOUGH__NFT();
 error MAX__NUMBER__OF__NFT__OVER__1();
 error OVER__MAX__NUM__OF__BES();
 error IpfsNFT__TransferFailed();
-error ONCE_ERROR_DAY(string msg);
+error ONCE_A_DAY();
+error ERROR_PRICE();
 contract ChineseZodiac is
     ERC721,
     ERC721Enumerable,
@@ -58,18 +59,27 @@ contract ChineseZodiac is
     // configure a default value for Warm
     DayState public currentDayState = DayState.AM;
 
-    mapping(uint => uint) tokenIdtoModeValue;
+    mapping(uint => uint) public tokenIdtoModeValue;
 
     enum DayState {
         AM,
         PM
     }
     uint constant internal SECONDS_PER_HOUR = 60 * 60;
-    mapping(address => uint256) latestMintTime ;
+    mapping(address => uint256) latestMintTime;
+    enum MintType {
+        Random,
+        Custom
+    }
+    mapping(address => MintType) public userMintType;
+    uint256 public mintPrice = 0.001 ether;
+    uint256 public replaceMintPrice = 0.0001 ether;
+    uint256 public mintCustomPrice = 0.01 ether;
 
     event MintRequest(uint256 indexed requestId);
     event MintSuccess(uint256 indexed requestId);
-    
+    event CustomMintSuccess(uint256 indexed tokenId);
+
     constructor(
         uint _maxNumberOftoken,
         uint256 _subscriptionId,
@@ -136,29 +146,50 @@ contract ChineseZodiac is
     }
 
     function mint() public payable {
-        require(
-            msg.value == 0.0005 ether,
-            " The price of each MDS is 0.0005 ether."
-        );
+        if(msg.value < mintPrice){
+            revert ERROR_PRICE();
+        }
         if (balanceOf(msg.sender) >= 1) revert MAX__NUMBER__OF__NFT__OVER__1();
         if (totalSupply() >= maxNumberOftoken) revert OVER__MAX__NUM__OF__BES();
         request(_tokenIdCounter,false);
         _tokenIdCounter++;
         latestMintTime[msg.sender] = block.timestamp;
+        userMintType[msg.sender] = MintType.Random;
+    }
+
+    function mintCustom(uint256 key) public payable {
+        if(msg.value < mintCustomPrice){
+            revert ERROR_PRICE();
+        }
+        if (balanceOf(msg.sender) >= 1) {
+            revert MAX__NUMBER__OF__NFT__OVER__1();
+        }
+        if (totalSupply() >= maxNumberOftoken) {
+            revert OVER__MAX__NUM__OF__BES();
+        }
+        uint256 modeValue = (key % lengthOfMetaData);
+        uint256 tokenId = _tokenIdCounter;
+        _safeMint(msg.sender, tokenId);
+        tokenIdtoModeValue[tokenId] = modeValue;
+        _setTokenURI(tokenId, allMetaData[modeValue][uint8(DayState.AM)]);
+        _tokenIdCounter++;
+        latestMintTime[msg.sender] = block.timestamp;
+        userMintType[msg.sender] = MintType.Custom;
+        emit CustomMintSuccess(tokenId);
     }
 
     function replaceMint() public payable {
-        require(
-            msg.value == 0.0001 ether,
-            " The price of each replace is 0.0001 ether."
-        );
+        if(msg.value < replaceMintPrice){
+            revert ERROR_PRICE();
+        }
         if (balanceOf(msg.sender) < 1) revert NO__ENOUGH__NFT();
         if((block.timestamp - latestMintTime[msg.sender]) <  1 days ){
-            revert ONCE_ERROR_DAY("once a day");
+            revert ONCE_A_DAY();
         }
         uint256 tokenId = tokenOfOwnerByIndex(msg.sender,0);
         request(tokenId,true);
         latestMintTime[msg.sender] = block.timestamp;
+        emit MintSuccess(tokenId);
     }
 
     // Assumes the subscription is funded sufficiently.

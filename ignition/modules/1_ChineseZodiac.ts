@@ -5,7 +5,7 @@ dotenv.config();
 import {networkConfig} from "../../helper-hardhat-config";
 const chainId = network.config.chainId??31337
 const config = networkConfig[chainId]
-const _maxNumberOftoken = 10000
+const _maxNumberOftoken = 100000
 const _keyHash = config["gasLane"] ||
             "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
 const vrfCoordinatorV2Address = config["vrfCoordinatorV2"]
